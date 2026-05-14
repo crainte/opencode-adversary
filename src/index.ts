@@ -8,11 +8,12 @@
  * Inspired by Goose's security features.
  */
 
-import { existsSync, readFileSync } from "node:fs"
-import { homedir } from "node:os"
-import { join } from "node:path"
 import type { Plugin } from "@opencode-ai/plugin"
+import { existsSync, readFileSync } from "fs"
+import { homedir } from "os"
+import { join } from "path"
 
+// @ts-ignore - JSON import
 import defaultConfig from "../defaults/config.json"
 
 // ============================================================================
@@ -210,7 +211,7 @@ async function getTaskContext(client: any, sessionID: string): Promise<string> {
     const recentMsgs = messages.slice(-3)
 
     let context = "### Original Request\n"
-    context += `${extractTextFromMessage(firstUserMsg)}\n`
+    context += extractTextFromMessage(firstUserMsg) + "\n"
 
     if (recentMsgs.length > 1) {
       context += "\n### Recent Context\n"
