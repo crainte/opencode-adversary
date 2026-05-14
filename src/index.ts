@@ -250,18 +250,22 @@ export const AdversaryPlugin: Plugin = async ({ client }) => {
     return {}
   }
 
-  // Show toast on load
+  // Show toast on load (if available - not available in local plugins)
   const patternCount = config.patterns.enabled ? config.patterns.rules.length : 0
   const adversaryStatus = config.adversary.enabled ? "on" : "off"
 
-  await client.tui.showToast({
-    body: {
-      title: "🛡️ Security Active",
-      message: `${patternCount} patterns, adversary: ${adversaryStatus}`,
-      variant: "info",
-      duration: 2500,
-    },
-  })
+  if (typeof client.tui?.showToast === "function") {
+    await client.tui.showToast({
+      body: {
+        title: "🛡️ Security Active",
+        message: `${patternCount} patterns, adversary: ${adversaryStatus}`,
+        variant: "info",
+        duration: 2500,
+      },
+    })
+  } else {
+    console.log(`[adversary] ${patternCount} patterns, adversary: ${adversaryStatus}`)
+  }
 
   return {
     "tool.execute.before": async (input: ToolInput, output: ToolOutput) => {
