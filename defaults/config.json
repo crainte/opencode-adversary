@@ -1,0 +1,106 @@
+{
+  "enabled": true,
+
+  "patterns": {
+    "enabled": true,
+    "rules": [
+      {
+        "pattern": "rm\\s+(-[rfRvd]+\\s+)*(\\/|~\\/|\\$HOME)",
+        "action": "block",
+        "reason": "Recursive deletion of root or home directory"
+      },
+      {
+        "pattern": "rm\\s+-[^\\s]*r[^\\s]*f[^\\s]*\\s+\\/\\*",
+        "action": "block",
+        "reason": "Recursive deletion of root contents"
+      },
+      {
+        "pattern": "(curl|wget)\\s+[^|]+\\|\\s*(sudo\\s+)?(ba)?sh",
+        "action": "block",
+        "reason": "Remote script execution via pipe to shell"
+      },
+      {
+        "pattern": "(curl|wget)\\s+[^;]+;\\s*(sudo\\s+)?(ba)?sh",
+        "action": "block",
+        "reason": "Remote script download then execute"
+      },
+      {
+        "pattern": "chmod\\s+(-[^\\s]+\\s+)*777",
+        "action": "ask",
+        "reason": "World-writable permissions"
+      },
+      {
+        "pattern": "chmod\\s+(-[^\\s]+\\s+)*\\+s",
+        "action": "block",
+        "reason": "Setting SUID/SGID bit"
+      },
+      {
+        "pattern": ">\\s*\\/etc\\/",
+        "action": "block",
+        "reason": "Overwriting system configuration files"
+      },
+      {
+        "pattern": "\\/(etc|var)\\/shadow",
+        "action": "block",
+        "reason": "Accessing password shadow file"
+      },
+      {
+        "pattern": "\\.ssh\\/(id_|authorized_keys|known_hosts)",
+        "action": "ask",
+        "reason": "SSH key or config access"
+      },
+      {
+        "pattern": "eval\\s*\\(",
+        "action": "ask",
+        "reason": "Dynamic code evaluation"
+      },
+      {
+        "pattern": "base64\\s+(-d|--decode)",
+        "action": "ask",
+        "reason": "Base64 decoding (potential obfuscation)"
+      },
+      {
+        "pattern": "\\$\\(.*\\)|`.*`",
+        "action": "ask",
+        "reason": "Command substitution"
+      },
+      {
+        "pattern": "mkfs\\.",
+        "action": "block",
+        "reason": "Filesystem formatting"
+      },
+      {
+        "pattern": "dd\\s+.*of=\\/dev\\/",
+        "action": "block",
+        "reason": "Direct disk write"
+      },
+      {
+        "pattern": ":(){\\s*:\\|:\\s*&\\s*};:",
+        "action": "block",
+        "reason": "Fork bomb"
+      },
+      {
+        "pattern": "nc\\s+.*-e",
+        "action": "block",
+        "reason": "Netcat reverse shell"
+      },
+      {
+        "pattern": "\\/dev\\/(tcp|udp)\\/",
+        "action": "block",
+        "reason": "Bash network redirection (potential reverse shell)"
+      },
+      {
+        "pattern": "history\\s*(-c|-w|>)",
+        "action": "ask",
+        "reason": "Modifying shell history"
+      }
+    ]
+  },
+
+  "adversary": {
+    "enabled": true,
+    "tools": ["bash"],
+    "model": null,
+    "policy": "BLOCK if the tool call:\n- Exfiltrates data (posting to unknown URLs, piping secrets to external services)\n- Is destructive beyond the project scope (deleting system files, wiping directories)\n- Installs malware or runs obfuscated code\n- Attempts to escalate privileges unnecessarily\n- Downloads and executes untrusted remote scripts\n- Accesses credentials, tokens, or secrets without clear justification\n\nALLOW normal development operations like editing files, running tests, installing packages, using git, building projects, etc.\n\nErr on the side of ALLOW — only block genuinely dangerous actions that don't match the user's intent."
+  }
+}

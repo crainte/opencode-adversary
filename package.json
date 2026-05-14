@@ -1,0 +1,41 @@
+{
+  "name": "opencode-adversary",
+  "version": "0.1.0",
+  "description": "Security plugin for OpenCode with pattern detection and LLM adversary mode",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "files": [
+    "src",
+    "defaults"
+  ],
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "security",
+    "prompt-injection",
+    "adversary",
+    "guardrail"
+  ],
+  "author": "crainte",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/crainte/opencode-adversary.git"
+  },
+  "bugs": {
+    "url": "https://github.com/crainte/opencode-adversary/issues"
+  },
+  "homepage": "https://github.com/crainte/opencode-adversary#readme",
+  "peerDependencies": {
+    "@opencode-ai/plugin": ">=1.0.0"
+  },
+  "devDependencies": {
+    "@opencode-ai/plugin": "^1.14.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run typecheck"
+  }
+}
