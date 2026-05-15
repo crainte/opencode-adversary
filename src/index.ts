@@ -211,7 +211,7 @@ async function getTaskContext(client: any, sessionID: string): Promise<string> {
     const recentMsgs = messages.slice(-3)
 
     let context = "### Original Request\n"
-    context += extractTextFromMessage(firstUserMsg) + "\n"
+    context += `${extractTextFromMessage(firstUserMsg)}\n`
 
     if (recentMsgs.length > 1) {
       context += "\n### Recent Context\n"
@@ -226,7 +226,14 @@ async function getTaskContext(client: any, sessionID: string): Promise<string> {
 
     return context
   } catch (e) {
-    console.error(`[adversary] Failed to get task context: ${e}`)
+    await client.app.log({
+      body: {
+        service: "opencode-adversary",
+        level: "error",
+        message: `Failed to get task context: ${e}`,
+        extra: { sessionID },
+      },
+    })
     return ""
   }
 }
@@ -243,6 +250,9 @@ function extractTextFromMessage(msg: any): string {
 // Main Plugin
 // ============================================================================
 
+// Track sessions that have received startup notification
+const greetedSessions = new Set<string>()
+
 export const AdversaryPlugin: Plugin = async ({ client }) => {
   const config = loadConfig()
 
@@ -250,24 +260,20 @@ export const AdversaryPlugin: Plugin = async ({ client }) => {
     return {}
   }
 
-  // Show toast on load (if available - not available in local plugins)
-  const patternCount = config.patterns.enabled ? config.patterns.rules.length : 0
-  const adversaryStatus = config.adversary.enabled ? "on" : "off"
-
-  if (typeof client.tui?.showToast === "function") {
-    await client.tui.showToast({
-      body: {
-        title: "🛡️ Security Active",
-        message: `${patternCount} patterns, adversary: ${adversaryStatus}`,
-        variant: "info",
-        duration: 2500,
-      },
-    })
-  } else {
-    console.log(`[adversary] ${patternCount} patterns, adversary: ${adversaryStatus}`)
-  }
+  const ruleCount = config.patterns.enabled ? config.patterns.rules.length : 0
 
   return {
+    "experimental.text.complete": async (
+      input: { sessionID: string; messageID: string; partID: string },
+      output: { text: string },
+    ) => {
+      // Only inject once per session
+      if (greetedSessions.has(input.sessionID)) return
+      greetedSessions.add(input.sessionID)
+
+      output.text = `${output.text}\n\n🛡️ Adversary: ${ruleCount} rules loaded`
+    },
+
     "tool.execute.before": async (input: ToolInput, output: ToolOutput) => {
       const { tool, sessionID } = input
       const { args } = output
@@ -320,7 +326,14 @@ export const AdversaryPlugin: Plugin = async ({ client }) => {
           })
 
           if (!reviewSession.data?.id) {
-            console.error("[adversary] Failed to create review session")
+            await client.app.log({
+              body: {
+                service: "opencode-adversary",
+                level: "error",
+                message: "Failed to create review session",
+                extra: { tool, sessionID },
+              },
+            })
             return // Fail open
           }
 
@@ -380,7 +393,6 @@ export const AdversaryPlugin: Plugin = async ({ client }) => {
           if (e.message?.includes("SECURITY")) {
             throw e
           }
-          console.error(`[adversary] Adversary review failed: ${e}`)
           await client.app.log({
             body: {
               service: "opencode-adversary",
@@ -396,3 +408,15 @@ export const AdversaryPlugin: Plugin = async ({ client }) => {
 }
 
 export default AdversaryPlugin
+
+export type { AdversaryConfig, PatternRule, SecurityConfig, ToolInput, ToolOutput }
+// Export internals for testing
+export {
+  buildAdversaryPrompt,
+  checkPatterns,
+  deepMerge,
+  extractTextFromMessage,
+  formatSecurityMessage,
+  getTextToScan,
+  loadConfig,
+}

@@ -10,6 +10,10 @@ local linters = new Mapping<String, Step> {
         glob = "**/*.ts"
         check = "npx tsc --noEmit"
     }
+    ["test"] {
+        glob = "**/*.ts"
+        check = "mise x bun -- bun test"
+    }
 }
 
 hooks {
