@@ -93,6 +93,127 @@
         "pattern": "history\\s*(-c|-w|>)",
         "action": "ask",
         "reason": "Modifying shell history"
+      },
+
+      {
+        "pattern": "bash\\s*<\\s*\\(\\s*(curl|wget)",
+        "action": "block",
+        "reason": "Bash process substitution with remote fetch"
+      },
+      {
+        "pattern": "python[23]?\\s+-c\\s+.*(urllib|requests).*(exec|eval)",
+        "action": "block",
+        "reason": "Python remote code execution"
+      },
+      {
+        "pattern": "powershell.*(DownloadString|Invoke-WebRequest).*Invoke-Expression",
+        "action": "block",
+        "reason": "PowerShell download and execute"
+      },
+      {
+        "pattern": "(curl|wget).*-d.*\\.(bash_history|zsh_history|history)",
+        "action": "block",
+        "reason": "History file exfiltration"
+      },
+      {
+        "pattern": "(crontab\\s+-e|echo.*>>?.*crontab|>\\s*/var/spool/cron)",
+        "action": "ask",
+        "reason": "Crontab modification (persistence)"
+      },
+      {
+        "pattern": "(systemctl.*(enable|daemon-reload)|\\.service.*>.*\\/etc\\/systemd)",
+        "action": "ask",
+        "reason": "Systemd service persistence"
+      },
+      {
+        "pattern": "echo.*NOPASSWD.*>>?.*sudoers",
+        "action": "block",
+        "reason": "Sudo NOPASSWD privilege escalation"
+      },
+      {
+        "pattern": "docker\\s+(run|exec).*--privileged",
+        "action": "block",
+        "reason": "Docker privileged container"
+      },
+      {
+        "pattern": "(chroot|unshare|nsenter).*(--mount|--pid|--net|--uts)",
+        "action": "block",
+        "reason": "Container/namespace escape attempt"
+      },
+      {
+        "pattern": "(insmod|rmmod|modprobe)\\s+.*\\.ko",
+        "action": "block",
+        "reason": "Kernel module manipulation"
+      },
+      {
+        "pattern": "echo.*>>?\\s*(\\/etc\\/hosts|hosts\\.txt)|tee\\s+(-a\\s+)?\\/etc\\/hosts",
+        "action": "ask",
+        "reason": "Hosts file modification"
+      },
+      {
+        "pattern": "nc\\s+(-[lp]+|--listen)\\s*\\d+",
+        "action": "block",
+        "reason": "Netcat listener (backdoor)"
+      },
+      {
+        "pattern": "ssh\\s+.*-[LRD]\\s+\\d+:",
+        "action": "ask",
+        "reason": "SSH tunnel"
+      },
+      {
+        "pattern": "kill(all)?\\s+.*(antivirus|firewall|defender|security|clamd|fail2ban)",
+        "action": "block",
+        "reason": "Killing security process"
+      },
+      {
+        "pattern": "(gdb\\s+.*attach|ptrace.*PTRACE_POKETEXT)",
+        "action": "block",
+        "reason": "Process injection"
+      },
+      {
+        "pattern": "(echo|printf)\\s+[0-9a-fA-F\\\\x]{20,}\\s*\\|\\s*(xxd|od).*\\|\\s*(bash|sh)",
+        "action": "block",
+        "reason": "Hex encoded shell execution"
+      },
+      {
+        "pattern": "(echo|printf)\\s+[A-Za-z0-9+/=]{30,}\\s*\\|\\s*base64\\s+-d\\s*\\|\\s*(bash|sh|zsh)",
+        "action": "block",
+        "reason": "Base64 encoded shell execution"
+      },
+      {
+        "pattern": "(gcore|gdb.*dump|\\/proc\\/[0-9]+\\/mem)",
+        "action": "block",
+        "reason": "Process memory dump"
+      },
+      {
+        "pattern": "(truncate.*\\.log|rm\\s+.*\\/var\\/log|echo\\s*>\\s*\\/var\\/log)",
+        "action": "ask",
+        "reason": "Log file manipulation"
+      },
+      {
+        "pattern": "chmod\\s+[47][0-7][0-7][0-7]\\s+",
+        "action": "block",
+        "reason": "SUID/SGID via octal permissions"
+      },
+      {
+        "pattern": "\\b(nmap|masscan|zmap|unicornscan)\\b.*-[sS]",
+        "action": "ask",
+        "reason": "Network scanning"
+      },
+      {
+        "pattern": "\\b(john|hashcat|hydra|medusa|brutespray)\\b",
+        "action": "block",
+        "reason": "Password cracking tool"
+      },
+      {
+        "pattern": "\\b(steghide|outguess|jphide|steganos)\\b",
+        "action": "ask",
+        "reason": "Steganography tool"
+      },
+      {
+        "pattern": "touch\\s+-[amt]\\s+|\\butimes\\b|\\bfutimes\\b",
+        "action": "ask",
+        "reason": "File timestamp manipulation"
       }
     ]
   },

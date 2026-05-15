@@ -9,7 +9,8 @@
     "resolveJsonModule": true,
     "declaration": true,
     "outDir": "dist",
-    "types": ["node"]
+    "types": ["node", "bun"]
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["src/__tests__/**/*"]
 }
