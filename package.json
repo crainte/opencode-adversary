@@ -1,6 +1,6 @@
 {
   "name": "opencode-adversary",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Security plugin for OpenCode with pattern detection and LLM adversary mode",
   "main": "src/index.ts",
   "types": "src/index.ts",
